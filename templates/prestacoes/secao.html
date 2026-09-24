@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}{{ spec.titulo }} · {{ app_name }}{% endblock %}
+{% block crumb %}<a href="{{ url_for('prestacoes.detalhe', item_id=prestacao.id) }}">{{ prestacao.entidade.codigo }}</a> · {{ spec.numero }}. {{ spec.titulo }}{% endblock %}
+{% macro campo(definicao, prefixo='') %}
+  {% set nome = (prefixo ~ '.' ~ definicao.nome) if prefixo else definicao.nome %}
+  {% if definicao.tipo == 'objeto' %}
+    <fieldset class="full" style="border:1px solid var(--border-color);border-radius:12px;padding:12px">
+      <legend>{{ definicao.rotulo }}</legend>
+      <div class="form-grid">
+        {% for filho in definicao.campos %}{{ campo(filho, nome) }}{% endfor %}
+      </div>
+    </fieldset>
+  {% elif definicao.tipo == 'bool' %}
+    <label class="field full">
+      <input type="hidden" name="{{ nome }}" value="0">
+      <input type="checkbox" name="{{ nome }}" value="1"> {{ definicao.rotulo }}
+      {% if definicao.ajuda %}<span class="hint">{{ definicao.ajuda }}</span>{% endif %}
+    </label>
+  {% elif definicao.tipo == 'escolha' %}
+    <label class="field">{{ definicao.rotulo }}
+      <select class="input" name="{{ nome }}">
+        <option value="">Selecione</option>
+        {% for valor, rotulo in definicao.opcoes %}
+        <option value="{{ valor }}">{{ rotulo }}</option>
+        {% endfor %}
+      </select>
+      {% if definicao.ajuda %}<span class="hint">{{ definicao.ajuda }}</span>{% endif %}
+    </label>
+  {% elif definicao.tipo == 'data' %}
+    <label class="field">{{ definicao.rotulo }}
+      <input class="input" type="date" name="{{ nome }}">
+      {% if definicao.ajuda %}<span class="hint">{{ definicao.ajuda }}</span>{% endif %}
+    </label>
+  {% else %}
+    <label class="field {{ 'full' if definicao.tipo == 'texto' and definicao.max_len is none and definicao.nome in ['objeto', 'descricao', 'historico', 'justificativa'] else '' }}">{{ definicao.rotulo }}
+      <input class="input" name="{{ nome }}" {% if definicao.tipo == 'decimal' %}inputmode="decimal"{% endif %}>
+      {% if definicao.ajuda %}<span class="hint">{{ definicao.ajuda }}</span>{% endif %}
+    </label>
+  {% endif %}
+{% endmacro %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ spec.numero }}. {{ spec.titulo }}</h1>
+    <p class="muted">{{ spec.ajuda or 'Campos com os nomes do documento JSON do Manual TCE v1.19.' }} Responsável: {{ 'entidade beneficiária' if spec.responsavel == 'entidade' else 'gestor' }}.</p>
+  </div>
+  <a class="btn btn-secondary" href="{{ url_for('prestacoes.detalhe', item_id=prestacao.id) }}">Voltar</a>
+</div>
+
+{% if not editavel %}
+<div class="alert alert-info">Esta seção está disponível para consulta. O preenchimento cabe ao perfil responsável e somente na fase correspondente do fluxo.</div>
+{% endif %}
+
+{% if editavel %}
+<form method="post" style="display:flex;gap:8px;margin-bottom:16px">
+  {% if bloco and bloco.sem_movimento %}
+  <button class="btn btn-secondary" name="acao" value="com_movimento" type="submit">Informar movimento</button>
+  {% else %}
+  <button class="btn btn-secondary" name="acao" value="sem_movimento" type="submit">Confirmar sem movimento</button>
+  {% endif %}
+</form>
+{% endif %}
+
+{% if spec.formato in ['objeto', 'flag'] %}
+<article class="card" style="margin-bottom:16px">
+  <div class="card-head"><h3>Dados da seção</h3></div>
+  <form class="card-body form-grid" method="post">
+    <input type="hidden" name="acao" value="salvar">
+    {% for definicao in spec.campos or [] %}{{ campo(definicao) }}{% endfor %}
+    {% if payload is mapping %}
+      {% for chave, valor in payload.items() %}
+        {% if chave not in (spec.listas or [])|map(attribute='nome')|list %}
+        <p class="full muted">{{ chave }}: {{ valor|resumo }}</p>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% if editavel %}<div class="full"><button class="btn btn-primary" type="submit">Salvar</button></div>{% endif %}
+  </form>
+</article>
+{% endif %}
+
+{% if spec.formato == 'lista' %}
+<article class="card" style="margin-bottom:16px">
+  <div class="card-head"><h3>Registros</h3></div>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>#</th><th>Conteúdo</th><th></th></tr></thead>
+      <tbody>
+      {% for item in payload or [] %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ item|resumo }}</td>
+          <td>
+            {% if editavel %}
+            <form method="post" data-confirm="Excluir este registro?">
+              <input type="hidden" name="acao" value="excluir">
+              <input type="hidden" name="indice" value="{{ loop.index0 }}">
+              <button class="btn btn-danger btn-sm" type="submit">Excluir</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="3" class="empty">Nenhum registro.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+{% if editavel %}
+<article class="card">
+  <div class="card-head"><h3>Incluir registro</h3></div>
+  <form class="card-body form-grid" method="post">
+    <input type="hidden" name="acao" value="adicionar">
+    {% for definicao in spec.campos or [] %}{{ campo(definicao) }}{% endfor %}
+    {% for grade in spec.grades or [] %}
+      <div class="full">
+        <h3>{{ grade.rotulo }}</h3>
+        {% for n in range(4) %}
+        <div class="form-grid" style="margin-bottom:8px">
+          {% for definicao in grade.campos %}
+          <label class="field">{{ definicao.rotulo }}
+            {% if definicao.tipo == 'escolha' %}
+            <select class="input" name="{{ definicao.nome }}"><option value=""></option>{% for valor, rotulo in definicao.opcoes %}<option value="{{ valor }}">{{ rotulo }}</option>{% endfor %}</select>
+            {% elif definicao.tipo == 'data' %}
+            <input class="input" type="date" name="{{ definicao.nome }}">
+            {% elif definicao.tipo == 'bool' %}
+            <input type="hidden" name="{{ definicao.nome }}" value="0"><input type="checkbox" name="{{ definicao.nome }}" value="1">
+            {% else %}
+            <input class="input" name="{{ definicao.nome }}">
+            {% endif %}
+          </label>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    <div class="full"><button class="btn btn-primary" type="submit">Incluir</button></div>
+  </form>
+</article>
+{% endif %}
+{% endif %}
+
+{% for lista in spec.listas or [] %}
+<article class="card" style="margin:16px 0">
+  <div class="card-head"><h3>{{ lista.rotulo }}</h3></div>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>#</th><th>Conteúdo</th><th></th></tr></thead>
+      <tbody>
+      {% for item in (payload.get(lista.nome) if payload is mapping else []) or [] %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ item|resumo }}</td>
+          <td>
+            {% if editavel %}
+            <form method="post" data-confirm="Excluir este item?">
+              <input type="hidden" name="acao" value="excluir_sub">
+              <input type="hidden" name="lista" value="{{ lista.nome }}">
+              <input type="hidden" name="indice" value="{{ loop.index0 }}">
+              <button class="btn btn-danger btn-sm" type="submit">Excluir</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="3" class="empty">Nenhum item.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if editavel %}
+  <form class="card-body form-grid" method="post">
+    <input type="hidden" name="acao" value="adicionar_sub">
+    <input type="hidden" name="lista" value="{{ lista.nome }}">
+    {% for definicao in lista.campos %}{{ campo(definicao) }}{% endfor %}
+    <div class="full"><button class="btn btn-primary" type="submit">Incluir em {{ lista.rotulo }}</button></div>
+  </form>
+  {% endif %}
+</article>
+{% endfor %}
+{% endblock %}

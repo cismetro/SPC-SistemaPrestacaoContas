@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Entidades · {{ app_name }}{% endblock %}
+{% block crumb %}<strong>Entidades</strong>{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Entidades beneficiárias</h1>
+    <p class="muted">APAE e Hospital já entram configurados. O administrador mantém o cadastro.</p>
+  </div>
+  {% if current_user.is_admin %}
+  <a class="btn btn-primary" href="{{ url_for('entidades.nova') }}">Nova entidade</a>
+  {% endif %}
+</div>
+<article class="card">
+  <div class="table-wrap">
+    <table class="data">
+      <thead>
+        <tr><th>Entidade</th><th>CNPJ</th><th>Contato</th><th>Audesp</th><th>Situação</th><th></th></tr>
+      </thead>
+      <tbody>
+      {% for e in entidades %}
+        <tr>
+          <td class="name">{{ e.nome_exibicao }}<div class="sub">{{ e.endereco }} · {{ e.bairro }} · {{ e.cidade }}/{{ e.uf }} · {{ e.cep }}</div></td>
+          <td>{{ e.cnpj_formatado }}</td>
+          <td>{{ e.telefones or '—' }}<div class="sub">{{ e.email or e.email_alternativo or 'sem e-mail' }}{% if e.horario %} · {{ e.horario }}{% endif %}</div></td>
+          <td>{{ e.codigo_audesp or 'pendente' }}</td>
+          <td>{% if e.ativa %}<span class="badge badge-success">Ativa</span>{% else %}<span class="badge badge-neutral">Inativa</span>{% endif %}</td>
+          <td>
+            {% if current_user.is_admin %}
+            <a class="btn btn-secondary btn-sm" href="{{ url_for('entidades.editar', item_id=e.id) }}">Editar</a>
+            <form method="post" action="{{ url_for('entidades.excluir', item_id=e.id) }}" data-confirm="Excluir ou inativar {{ e.nome_exibicao }}?" style="display:inline">
+              <button class="btn btn-danger btn-sm" type="submit">Excluir</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+{% endblock %}

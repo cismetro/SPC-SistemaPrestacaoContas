@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Painel · {{ app_name }}{% endblock %}
+{% block crumb %}<strong>Painel</strong> · {{ current_user.perfil_rotulo }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    {% if current_user.is_entidade %}
+    <h1>{{ current_user.entidade.nome_exibicao if current_user.entidade else 'Entidade' }}</h1>
+    <p class="muted">Preencha somente os dados desta entidade e envie para a conferência do gestor. O JSON do TCE não é gerado aqui.</p>
+    {% elif current_user.is_gestor %}
+    <h1>Conferência das prestações</h1>
+    <p class="muted">Confira APAE e Hospital, valide pelo Manual do TCE e só então gere o JSON. A transmissão é feita por você no AUDESP Fase V.</p>
+    {% else %}
+    <h1>Administração do SPC</h1>
+    <p class="muted">Usuários, entidades e consulta geral. A geração do arquivo do TCE permanece com o gestor.</p>
+    {% endif %}
+  </div>
+</div>
+
+<section class="kpis">
+  <article class="kpi"><span>Prestações</span><strong>{{ prestacoes|length }}</strong><em>exercícios acompanhados</em></article>
+  <article class="kpi"><span>Em conferência</span><strong>{{ em_conferencia }}</strong><em>aguardando o gestor</em></article>
+  <article class="kpi"><span>Validadas</span><strong>{{ validadas }}</strong><em>liberadas para o JSON</em></article>
+  <article class="kpi"><span>JSON</span><strong>{{ arquivos|length }}</strong><em>arquivos recentes</em></article>
+</section>
+
+<div class="grid-2">
+  <article class="card">
+    <div class="card-head"><h3>Situação por entidade</h3><a href="{{ url_for('prestacoes.lista') }}">Abrir prestações</a></div>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Entidade</th><th>Exercício</th><th>Situação</th><th></th></tr></thead>
+        <tbody>
+        {% for p in prestacoes %}
+          <tr>
+            <td class="name">{{ p.entidade.nome_exibicao }}<div class="sub">CNPJ {{ p.entidade.cnpj_formatado }}</div></td>
+            <td>{{ p.ano }}</td>
+            <td><span class="badge {{ badge_status(p.status) }}">{{ p.status_rotulo }}</span></td>
+            <td><a class="btn btn-secondary btn-sm" href="{{ url_for('prestacoes.detalhe', item_id=p.id) }}">Abrir</a></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="empty">Nenhuma prestação aberta.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+  <div class="stack">
+    {% if current_user.is_gestor or current_user.is_admin %}
+    <article class="card">
+      <div class="card-head"><h3>Pendências abertas</h3></div>
+      <div class="card-body">
+        {% for pendencia in pendencias %}
+          <p><strong>{{ pendencia.campo or pendencia.secao }}</strong> · {{ pendencia.responsavel }}<br>{{ pendencia.problema }}</p>
+        {% else %}
+          <p class="muted">Nenhuma pendência aberta.</p>
+        {% endfor %}
+      </div>
+    </article>
+    <article class="card">
+      <div class="card-head"><h3>Arquivos JSON</h3></div>
+      <div class="card-body">
+        {% for arquivo in arquivos %}
+          <p><strong>{{ arquivo.nome }}</strong><br><span class="muted">{{ arquivo.gerado_em.strftime('%d/%m/%Y %H:%M') }} · {{ 'baixado' if arquivo.baixado_em else 'ainda não baixado' }}</span></p>
+        {% else %}
+          <p class="muted">Nenhum JSON gerado.</p>
+        {% endfor %}
+      </div>
+    </article>
+    {% else %}
+    <article class="card">
+      <div class="card-body">
+        <h3>O que esta entidade faz</h3>
+        <p>Salvar os blocos do manual, revisar e submeter à conferência. Empenhos, repasses, glosas e o parecer conclusivo são do gestor.</p>
+      </div>
+    </article>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

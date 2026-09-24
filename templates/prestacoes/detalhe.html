@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ prestacao.entidade.nome_exibicao }} · {{ prestacao.ano }}{% endblock %}
+{% block crumb %}<strong>{{ prestacao.entidade.codigo }}</strong> · exercício {{ prestacao.ano }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ prestacao.entidade.nome_exibicao }}</h1>
+    <p class="muted">{{ prestacao.entidade.endereco }} · {{ prestacao.entidade.telefones or 'sem telefone' }} · CNPJ {{ prestacao.entidade.cnpj_formatado }}</p>
+  </div>
+  <span class="badge {{ badge_status(prestacao.status) }}">{{ prestacao.status_rotulo }}</span>
+</div>
+
+<article class="card" style="margin-bottom:16px">
+  <div class="card-head"><h3>Descritor e código do ajuste</h3></div>
+  <form class="card-body form-grid" method="post" action="{{ url_for('prestacoes.cabecalho', item_id=prestacao.id) }}">
+    <label class="field">Tipo do documento
+      <select class="input" name="tipo_documento" {% if not pode_cabecalho %}disabled{% endif %}>
+        <option value="">Selecione</option>
+        {% for valor, rotulo in tipos %}
+        <option value="{{ valor }}" {% if prestacao.tipo_documento == valor %}selected{% endif %}>{{ rotulo }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field">Código do ajuste
+      <input class="input" name="codigo_ajuste" value="{{ prestacao.codigo_ajuste or '' }}" maxlength="16" {% if not pode_cabecalho %}disabled{% endif %}>
+    </label>
+    <label class="field">Município Audesp
+      <input class="input" name="municipio_audesp" value="{{ prestacao.municipio_audesp or '' }}" {% if not pode_cabecalho %}disabled{% endif %}>
+    </label>
+    <label class="field">Entidade Audesp
+      <input class="input" value="{{ prestacao.entidade.codigo_audesp or 'cadastrar na entidade' }}" disabled>
+    </label>
+    <label class="field">Ano<input class="input" value="{{ prestacao.ano }}" disabled></label>
+    <label class="field">Mês do descritor<input class="input" value="12" disabled></label>
+    <label class="field"><input type="checkbox" name="primeira_prestacao" {% if prestacao.primeira_prestacao %}checked{% endif %} {% if not pode_cabecalho %}disabled{% endif %}> Primeira prestação do ajuste</label>
+    <label class="field"><input type="checkbox" name="ultimo_periodo_vigencia" {% if prestacao.ultimo_periodo_vigencia %}checked{% endif %} {% if not pode_cabecalho %}disabled{% endif %}> Último período da vigência</label>
+    <label class="field"><input type="checkbox" name="retificacao" {% if prestacao.retificacao %}checked{% endif %} {% if not pode_cabecalho %}disabled{% endif %}> Retificação de prestação já armazenada</label>
+    <label class="field"><input type="checkbox" name="declaracao_negativa" {% if prestacao.declaracao_negativa %}checked{% endif %} {% if not pode_cabecalho %}disabled{% endif %}> Declaração negativa, sem repasse no exercício</label>
+    {% if current_user.is_gestor %}
+    <label class="field full"><input type="checkbox" name="conferencia_codigos_audesp" {% if prestacao.conferencia_codigos_audesp %}checked{% endif %}> Conferi município e entidade na planilha do coletor Audesp</label>
+    <label class="field full"><input type="checkbox" name="conferencia_ajuste" {% if prestacao.conferencia_ajuste %}checked{% endif %}> Conferi o código do ajuste no módulo de Ajustes</label>
+    <label class="field full"><input type="checkbox" name="conferencia_certidoes" {% if prestacao.conferencia_certidoes %}checked{% endif %}> Conferi as certidões concluídas no Audesp Fase V</label>
+    {% endif %}
+    {% if pode_cabecalho %}
+    <div class="full"><button class="btn btn-primary" type="submit">Salvar cabeçalho</button></div>
+    {% endif %}
+  </form>
+</article>
+
+<div class="page-head">
+  <div>
+    <h2 style="margin:0">Blocos do manual</h2>
+    <p class="muted">A entidade preenche os blocos próprios. O gestor preenche empenho, repasse, glosa, parecer e certidões do concedente.</p>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    {% if current_user.is_entidade and prestacao.editavel_entidade %}
+    <form method="post" action="{{ url_for('prestacoes.preenchido', item_id=prestacao.id) }}"><button class="btn btn-secondary" type="submit">Marcar preenchido</button></form>
+    <form method="post" action="{{ url_for('prestacoes.enviar', item_id=prestacao.id) }}" data-confirm="Enviar esta prestação para conferência do gestor?"><button class="btn btn-primary" type="submit">Enviar para conferência</button></form>
+    {% endif %}
+    {% if current_user.is_gestor %}
+    <form method="post" action="{{ url_for('conferencia.iniciar', item_id=prestacao.id) }}"><button class="btn btn-secondary" type="submit">Iniciar conferência</button></form>
+    <a class="btn btn-secondary" href="{{ url_for('conferencia.pendencias', item_id=prestacao.id) }}">Pendências</a>
+    <form method="post" action="{{ url_for('conferencia.validar', item_id=prestacao.id) }}"><button class="btn btn-primary" type="submit">Validar pelo manual</button></form>
+    <a class="btn btn-secondary" href="{{ url_for('conferencia.arquivos', item_id=prestacao.id) }}">JSON</a>
+    {% endif %}
+    <a class="btn btn-ghost" href="{{ url_for('prestacoes.trilha', item_id=prestacao.id) }}">Histórico</a>
+  </div>
+</div>
+
+<article class="card">
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Seção</th><th>Responsável</th><th>Situação</th><th></th></tr></thead>
+      <tbody>
+      {% for secao in secoes %}
+        {% set bloco = blocos.get(secao.chave) %}
+        <tr>
+          <td class="name">{{ secao.numero }}. {{ secao.titulo }}<div class="sub">{{ secao.ajuda or '' }}</div></td>
+          <td>{{ 'Entidade' if secao.responsavel == 'entidade' else 'Gestor' }}</td>
+          <td>
+            {% if bloco and bloco.sem_movimento %}
+              <span class="badge badge-neutral">Sem movimento</span>
+            {% elif bloco %}
+              <span class="badge badge-success">Gravado</span>
+            {% else %}
+              <span class="badge badge-warning">Não revisado</span>
+            {% endif %}
+          </td>
+          <td><a class="btn btn-secondary btn-sm" href="{{ url_for('prestacoes.secao', item_id=prestacao.id, secao=secao.chave) }}">Abrir</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="empty">Defina o tipo do documento para listar os blocos específicos do ajuste.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+{% endblock %}

@@ -1,0 +1,12 @@
+
+  SPC — Sistema de Prestação de Contas
+  Prefeitura Municipal de Cosmópolis — SP
+  ──────────────────────────────────────────────────────────────
+  Local       http://127.0.0.1:5735
+  Rede        http://192.168.76.172:5735
+  Versão      1.0.0
+  Ambiente    production  ·  Python 3.13.2
+  Servidor    Waitress
+  Encerrar    CTRL+C
+  ──────────────────────────────────────────────────────────────
+

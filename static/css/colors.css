@@ -1,0 +1,259 @@
+/*
+SPC - Sistema de Prestação de Contas
+Prefeitura Municipal de Cosmópolis - SP
+Variáveis de Cores - Tema Saúde
+*/
+
+:root {
+    /* Colors from wt_health_center_free Template */
+    --primary-color: #4fc9c4; /* Template primary turquoise */
+    --primary-dark: #43aca7; /* Darker turquoise for hover states */
+    --primary-hover: #3c9b96; /* Even darker for active states */
+    --secondary-color: #6d7a8c; /* Template secondary */
+    --text-color: #3f485d; /* Template default text color */
+    --border-color: #e5e5e5; /* Template default border */
+    --success-color: #79b24a; /* Template success green */
+    --warning-color: #f2823c; /* Template warning orange */
+    --danger-color: #e81d51; /* Template danger red */
+    --info-color: #91ceff; /* Template info blue */
+    --light-color: #2a303b;
+    --dark-color: #2a303b; /* Template bottom_bg_color */
+    --gray-color: #6d7a8c; /* Template footer text color */
+    --input-focus: #4fc9c4; /* Template primary color for focus */
+    --input-focus-shadow: rgba(79, 201, 196, 0.25); /* Template shadow */
+
+    /* Paleta de Cores Saúde (100% to 0%) */
+    --color-100: #ffffff;
+    --color-95: #ebf9f9;
+    --color-90: #d8f3f2;
+    --color-85: #c4edec;
+    --color-80: #b1e7e5;
+    --color-75: #9de1df;
+    --color-70: #8adbd8;
+    --color-65: #76d5d2;
+    --color-60: #63cfcb;
+    --color-55: #4fc9c4;
+    --color-50: #3cc3bf;
+    --color-45: #36b0ac;
+    --color-40: #309c98;
+    --color-35: #2a8985;
+    --color-30: #247572;
+    --color-25: #1e625f;
+    --color-20: #184e4c;
+    --color-15: #123b39;
+    --color-10: #0c2726;
+    --color-5: #061413;
+    --color-0: #000000;
+
+    /* Cores de Status */
+    --success-light: #d1e7dd;
+    --warning-light: #fff3cd;
+    --danger-light: #f8d7da;
+    --info-light: #cff4fc;
+
+    /* Cores Neutras */
+    --bg-color: var(--color-95);
+    --card-bg: var(--color-100);
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --text-muted: #adb5bd;
+
+    /* Sombras */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+
+    /* Bordas */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 16px;
+
+    /* Transições */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* Cores por Tipo de Patrimônio */
+.tipo-movel { color: #0d6efd; }
+.tipo-eletronico { color: #6f42c1; }
+.tipo-informatica { color: #20c997; }
+.tipo-veiculo { color: #fd7e14; }
+.tipo-imovel { color: #dc3545; }
+.tipo-outros { color: #6c757d; }
+
+/* Cores por Situação */
+.situacao-ativo { background-color: var(--success-color); }
+.situacao-em_manutencao { background-color: var(--warning-color); }
+.situacao-em_movimentacao { background-color: var(--info-color); }
+.situacao-baixado { background-color: var(--danger-color); }
+
+/* Cores por Conservação */
+.conservacao-novo { color: #198754; }
+.conservacao-bom { color: #20c997; }
+.conservacao-regular { color: #fd7e14; }
+.conservacao-danificado { color: #dc3545; }
+.conservacao-inservivel { color: #6c757d; }
+
+/* Gradientes */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+}
+
+/* Cores para Sidebar */
+.sidebar {
+    background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--secondary-color);
+    color: #000;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Cores para Navbar */
+.navbar-custom {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-custom .navbar-brand {
+    color: #fff;
+    font-weight: 600;
+}
+
+.navbar-custom .navbar-brand:hover {
+    color: #f8f9fa;
+}
+
+.brand-mark {
+    display: block;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: contain;
+    background: #fff;
+}
+
+/* Cores para Botões */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: #000;
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-dark);
+    border-color: var(--secondary-dark);
+    color: #000;
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--primary-dark);
+}
+
+/* Tabelas */
+.table thead th {
+    background-color: var(--bg-color);
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+/* Badges */
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+}
+
+/* Modal Header */
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: #fff;
+}
+
+/* Forms */
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.25);
+}
+
+/* Efeito hover apenas para selects */
+.form-select:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(79, 201, 196, 0.25);
+}
+
+/* Alerts */
+.alert-success {
+    background-color: var(--success-light);
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.alert-warning {
+    background-color: var(--warning-light);
+    border-color: var(--warning-color);
+    color: #997404;
+}
+
+.alert-danger {
+    background-color: var(--danger-light);
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+.alert-info {
+    background-color: var(--info-light);
+    border-color: var(--info-color);
+    color: #055160;
+}

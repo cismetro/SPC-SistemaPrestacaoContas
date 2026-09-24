@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Prestações · {{ app_name }}{% endblock %}
+{% block crumb %}<strong>Prestações</strong>{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Prestações de contas</h1>
+    <p class="muted">Um exercício por entidade. O arquivo final sai somente depois da validação do gestor.</p>
+  </div>
+</div>
+{% if current_user.is_admin or current_user.is_gestor or current_user.is_entidade %}
+<article class="card" style="margin-bottom:16px">
+  <form class="card-body filters" method="post" action="{{ url_for('prestacoes.nova') }}">
+    {% if not current_user.is_entidade %}
+    <select class="input" name="entidade_id" required>
+      <option value="">Entidade</option>
+      {% for entidade in entidades %}
+      <option value="{{ entidade.id }}">{{ entidade.nome_exibicao }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
+    <input class="input" type="number" name="ano" min="2025" max="2100" value="{{ now.year }}" required>
+    <button class="btn btn-primary" type="submit">Abrir exercício</button>
+  </form>
+</article>
+{% endif %}
+<article class="card">
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Entidade</th><th>Exercício</th><th>Tipo</th><th>Situação</th><th></th></tr></thead>
+      <tbody>
+      {% for p in prestacoes %}
+        <tr>
+          <td class="name">{{ p.entidade.nome_exibicao }}</td>
+          <td>{{ p.ano }}</td>
+          <td>{{ p.tipo_documento or 'tipo ainda não definido' }}</td>
+          <td><span class="badge {{ badge_status(p.status) }}">{{ p.status_rotulo }}</span></td>
+          <td><a class="btn btn-secondary btn-sm" href="{{ url_for('prestacoes.detalhe', item_id=p.id) }}">Abrir</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="empty">Nenhuma prestação.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+{% endblock %}

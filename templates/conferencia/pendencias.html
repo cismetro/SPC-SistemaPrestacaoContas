@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Pendências · {{ app_name }}{% endblock %}
+{% block crumb %}<strong>Conferência</strong> · {{ prestacao.entidade.nome_exibicao }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Pendências de {{ prestacao.entidade.nome_exibicao }}</h1>
+    <p class="muted">Cada pendência informa o campo, quem corrige e o que precisa ser feito. Com pendência aberta o JSON não é gerado.</p>
+  </div>
+  <div style="display:flex;gap:8px">
+    <form method="post" action="{{ url_for('conferencia.devolver', item_id=prestacao.id) }}"><button class="btn btn-secondary" type="submit">Devolver à entidade</button></form>
+    <a class="btn btn-primary" href="{{ url_for('prestacoes.detalhe', item_id=prestacao.id) }}">Voltar à prestação</a>
+  </div>
+</div>
+<article class="card" style="margin-bottom:16px">
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Seção</th><th>Campo</th><th>Quem corrige</th><th>Problema</th><th>Correção</th></tr></thead>
+      <tbody>
+      {% for item in pendencias %}
+        <tr>
+          <td>{{ item.secao or '—' }}</td>
+          <td class="name">{{ item.campo or '—' }}</td>
+          <td>{{ item.responsavel }}</td>
+          <td>{{ item.problema }}</td>
+          <td>{{ item.correcao }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="empty">Nenhuma pendência aberta.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+{% if current_user.is_gestor %}
+<article class="card">
+  <div class="card-head"><h3>Registrar pendência manual</h3></div>
+  <form class="card-body form-grid" method="post">
+    <label class="field">Seção<input class="input" name="secao"></label>
+    <label class="field">Campo<input class="input" name="campo" required></label>
+    <label class="field">Quem corrige
+      <select class="input" name="responsavel">
+        <option value="entidade">Entidade</option>
+        <option value="gestor">Gestor</option>
+      </select>
+    </label>
+    <label class="field full">Problema<textarea class="input" name="problema" required></textarea></label>
+    <label class="field full">O que corrigir<textarea class="input" name="correcao" required></textarea></label>
+    <div class="full"><button class="btn btn-primary" type="submit">Registrar</button></div>
+  </form>
+</article>
+{% endif %}
+{% endblock %}

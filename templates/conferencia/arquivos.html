@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}JSON · {{ app_name }}{% endblock %}
+{% block crumb %}<strong>JSON</strong> · {{ prestacao.entidade.nome_exibicao }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Arquivo da prestação</h1>
+    <p class="muted">O SPC monta o JSON conferido. Ele não autentica nem transmite ao Audesp. O gestor baixa o arquivo e envia no AUDESP Fase V.</p>
+  </div>
+</div>
+<article class="card" style="margin-bottom:16px">
+  <div class="card-body">
+    <p>Situação: <span class="badge {{ badge_status(prestacao.status) }}">{{ prestacao.status_rotulo }}</span></p>
+    {% if rota_audesp %}
+    <p>Rota informativa do manual para este tipo de ajuste: <strong>{{ rota_audesp }}</strong></p>
+    {% endif %}
+    <p>Ambientes do TCE, para uso direto pelo gestor: piloto <strong>https://audesp-piloto.tce.sp.gov.br</strong> e produção <strong>https://audesp.tce.sp.gov.br</strong>.</p>
+    {% if achados %}
+    <div class="alert alert-danger">Há {{ achados|length }} pendência(s). O arquivo não pode ser gerado.</div>
+    <a class="btn btn-secondary" href="{{ url_for('conferencia.pendencias', item_id=prestacao.id) }}">Ver pendências</a>
+    {% elif pode_gerar %}
+    <form method="post" action="{{ url_for('conferencia.gerar', item_id=prestacao.id) }}" data-confirm="Gerar o JSON desta entidade?">
+      <button class="btn btn-primary" type="submit">Gerar JSON</button>
+    </form>
+    {% endif %}
+  </div>
+</article>
+<article class="card" style="margin-bottom:16px">
+  <div class="card-head"><h3>Arquivos gerados</h3></div>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Arquivo</th><th>Gerado</th><th>Download</th><th></th></tr></thead>
+      <tbody>
+      {% for arquivo in prestacao.arquivos %}
+        <tr>
+          <td class="name">{{ arquivo.nome }}<div class="sub">SHA-256 {{ arquivo.sha256 }}{% if not arquivo.vigente %} · substituído{% endif %}</div></td>
+          <td>{{ arquivo.gerado_em.strftime('%d/%m/%Y %H:%M') }}{% if arquivo.gerado_por %} · {{ arquivo.gerado_por.nome }}{% endif %}</td>
+          <td>{{ arquivo.baixado_em.strftime('%d/%m/%Y %H:%M') if arquivo.baixado_em else 'ainda não baixado' }}</td>
+          <td><a class="btn btn-secondary btn-sm" href="{{ url_for('conferencia.baixar', arquivo_id=arquivo.id) }}">Baixar</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="empty">Nenhum arquivo gerado.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+{% if current_user.is_gestor %}
+<article class="card">
+  <div class="card-head"><h3>Registrar o envio feito no AUDESP</h3></div>
+  <form class="card-body form-grid" method="post" action="{{ url_for('conferencia.protocolo', item_id=prestacao.id) }}">
+    <label class="field">Protocolo recebido no AUDESP Fase V
+      <input class="input" name="protocolo_audesp" value="{{ prestacao.protocolo_audesp or '' }}" required>
+    </label>
+    <div class="full"><button class="btn btn-primary" type="submit">Registrar protocolo</button></div>
+    <p class="full muted">Este botão apenas anota o protocolo. A transmissão do arquivo continua sendo feita pelo gestor, fora deste sistema.</p>
+  </form>
+</article>
+{% endif %}
+{% endblock %}

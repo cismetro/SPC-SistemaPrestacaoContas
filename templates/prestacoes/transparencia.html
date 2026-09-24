@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Transparência · {{ app_name }}{% endblock %}
+{% block crumb %}<a href="{{ url_for('prestacoes.detalhe', item_id=prestacao.id) }}">{{ prestacao.entidade.codigo }}</a> · transparência{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>34. Transparência</h1>
+    <p class="muted">Se a entidade mantém sítio, todos os requisitos do manual precisam de resposta.</p>
+  </div>
+</div>
+<article class="card">
+  <form class="card-body" method="post">
+    <label class="field"><input type="checkbox" name="mantem" {% if payload.entidade_beneficiaria_mantem_sitio_internet %}checked{% endif %} {% if not editavel %}disabled{% endif %}> A entidade mantém sítio na internet</label>
+    <label class="field">Sítios, um por linha
+      <textarea class="input" name="sitios_internet" {% if not editavel %}disabled{% endif %}>{{ sitios }}</textarea>
+    </label>
+    {% for campo, titulo, tabela in grupos %}
+      <h3>{{ titulo }}</h3>
+      {% for codigo, rotulo in tabela %}
+        <label class="field"><input type="checkbox" name="{{ campo }}_{{ codigo }}" {% if codigo in marcados[campo] %}checked{% endif %} {% if not editavel %}disabled{% endif %}> {{ codigo }}. {{ rotulo }}</label>
+      {% endfor %}
+    {% endfor %}
+    {% if editavel %}<button class="btn btn-primary" type="submit">Salvar transparência</button>{% endif %}
+  </form>
+</article>
+{% endblock %}

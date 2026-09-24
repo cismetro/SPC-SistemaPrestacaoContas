@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Entidade · {{ app_name }}{% endblock %}
+{% block crumb %}<strong>Entidades</strong> · {{ 'editar' if entidade and entidade.id is defined else 'nova' }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ 'Editar entidade' if entidade and entidade.id is defined else 'Nova entidade' }}</h1>
+    <p class="muted">O código Audesp é o da planilha do coletor, não o código IBGE do município.</p>
+  </div>
+</div>
+<article class="card">
+  <form class="card-body form-grid" method="post">
+    {% set e = entidade or {} %}
+    <label class="field">Código interno<input class="input" name="codigo" required value="{{ e.codigo or '' }}"></label>
+    <label class="field">Código da entidade no Audesp<input class="input" name="codigo_audesp" value="{{ e.codigo_audesp or '' }}"></label>
+    <label class="field">Nome de exibição<input class="input" name="nome_exibicao" required value="{{ e.nome_exibicao or '' }}"></label>
+    <label class="field">Razão social<input class="input" name="razao_social" required value="{{ e.razao_social or '' }}"></label>
+    <label class="field">CNPJ<input class="input" name="cnpj" required value="{{ e.cnpj_formatado if e.cnpj_formatado is defined else (e.cnpj or '') }}"></label>
+    <label class="field">Telefones<input class="input" name="telefones" value="{{ e.telefones or '' }}"></label>
+    <label class="field full">Endereço<input class="input" name="endereco" required value="{{ e.endereco or '' }}"></label>
+    <label class="field">Bairro<input class="input" name="bairro" value="{{ e.bairro or '' }}"></label>
+    <label class="field">Cidade<input class="input" name="cidade" value="{{ e.cidade or 'Cosmópolis' }}"></label>
+    <label class="field">UF<input class="input" name="uf" maxlength="2" value="{{ e.uf or 'SP' }}"></label>
+    <label class="field">CEP<input class="input" name="cep" value="{{ e.cep or '' }}"></label>
+    <label class="field">Horário<input class="input" name="horario" value="{{ e.horario or '' }}"></label>
+    <label class="field">E-mail oficial<input class="input" type="email" name="email" value="{{ e.email or '' }}"></label>
+    <label class="field">E-mail alternativo<input class="input" type="email" name="email_alternativo" value="{{ e.email_alternativo or '' }}"></label>
+    <label class="field full"><input type="checkbox" name="ativa" {% if e.ativa is not defined or e.ativa %}checked{% endif %}> Entidade ativa</label>
+    <div class="full" style="display:flex;gap:8px">
+      <button class="btn btn-primary" type="submit">Salvar</button>
+      <a class="btn btn-secondary" href="{{ url_for('entidades.lista') }}">Cancelar</a>
+    </div>
+  </form>
+</article>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Histórico · {{ app_name }}{% endblock %}
+{% block crumb %}<a href="{{ url_for('prestacoes.detalhe', item_id=prestacao.id) }}">{{ prestacao.entidade.codigo }}</a> · histórico{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Rastreabilidade</h1>
+    <p class="muted">Quem alterou, enviou, conferiu, validou, gerou e baixou o JSON.</p>
+  </div>
+</div>
+<article class="card">
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Quando</th><th>Quem</th><th>Ação</th><th>Detalhe</th></tr></thead>
+      <tbody>
+      {% for evento in prestacao.eventos %}
+        <tr>
+          <td>{{ evento.criado_em.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>{{ evento.usuario.nome if evento.usuario else '—' }}</td>
+          <td>{{ evento.acao }}</td>
+          <td>{{ evento.detalhe }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="empty">Sem eventos.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+{% endblock %}

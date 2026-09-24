@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Parecer conclusivo · {{ app_name }}{% endblock %}
+{% block crumb %}<a href="{{ url_for('prestacoes.detalhe', item_id=prestacao.id) }}">{{ prestacao.entidade.codigo }}</a> · parecer conclusivo{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>33. Parecer conclusivo</h1>
+    <p class="muted">Preenchimento exclusivo do gestor, depois da conferência das duas entidades no que lhes cabe.</p>
+  </div>
+</div>
+<article class="card">
+  <form class="card-body form-grid" method="post">
+    <label class="field">Identificação do parecer, se houver
+      <input class="input" name="identificacao_parecer" value="{{ payload.identificacao_parecer or '' }}" {% if not editavel %}disabled{% endif %}>
+    </label>
+    <label class="field">Conclusão
+      <select class="input" name="conclusao_parecer" {% if not editavel %}disabled{% endif %}>
+        <option value="">Selecione</option>
+        <option value="1" {% if payload.conclusao_parecer == 1 %}selected{% endif %}>1 — Favorável</option>
+        <option value="2" {% if payload.conclusao_parecer == 2 %}selected{% endif %}>2 — Favorável com ressalvas</option>
+        <option value="3" {% if payload.conclusao_parecer == 3 %}selected{% endif %}>3 — Desfavorável</option>
+      </select>
+    </label>
+    <label class="field full">Considerações
+      <textarea class="input" name="consideracoes_parecer" {% if not editavel %}disabled{% endif %}>{{ payload.consideracoes_parecer or '' }}</textarea>
+    </label>
+    {% for codigo, titulo in tipos %}
+      {% set atual = atuais.get(codigo, {}) %}
+      <div class="full" style="border-top:1px solid var(--border-color);padding-top:12px">
+        <strong>{{ codigo }}. {{ titulo }}</strong>
+        <p class="muted">{{ perguntas[codigo] }}</p>
+        <label class="field">Posicionamento
+          <select class="input" name="declaracao_{{ codigo }}" {% if not editavel %}disabled{% endif %}>
+            <option value="">Selecione</option>
+            <option value="1" {% if atual.declaracao == 1 %}selected{% endif %}>1 — Sim</option>
+            <option value="2" {% if atual.declaracao == 2 %}selected{% endif %}>2 — Não</option>
+            {% if codigo == 4 %}<option value="3" {% if atual.declaracao == 3 %}selected{% endif %}>3 — Prejudicado</option>{% endif %}
+          </select>
+        </label>
+        <label class="field">Justificativa
+          <textarea class="input" name="justificativa_{{ codigo }}" {% if not editavel %}disabled{% endif %}>{{ atual.justificativa or '' }}</textarea>
+        </label>
+      </div>
+    {% endfor %}
+    {% if editavel %}<div class="full"><button class="btn btn-primary" type="submit">Salvar parecer</button></div>{% endif %}
+  </form>
+</article>
+{% endblock %}

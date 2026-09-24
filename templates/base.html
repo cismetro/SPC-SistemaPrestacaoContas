@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <link rel="icon" href="{{ favicon_url }}" type="image/x-icon">
+  <link rel="shortcut icon" href="{{ favicon_url }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/colors.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <img class="brand-mark" src="{{ favicon_url }}" alt="SPC">
+      <div>
+        <strong>SPC</strong>
+        <span>{{ prefeitura }}</span>
+      </div>
+    </div>
+    <nav class="nav">
+      <a class="{{ 'active' if request.endpoint == 'dashboard.index' }}" href="{{ url_for('dashboard.index') }}"><span class="ico">▣</span> Painel</a>
+      <a class="{{ 'active' if request.endpoint and request.endpoint.startswith('prestacoes') }}" href="{{ url_for('prestacoes.lista') }}"><span class="ico">▤</span> Prestações</a>
+      {% if current_user.is_admin or current_user.is_gestor %}
+      <a class="{{ 'active' if request.endpoint and request.endpoint.startswith('entidades') }}" href="{{ url_for('entidades.lista') }}"><span class="ico">⌂</span> Entidades</a>
+      {% endif %}
+      {% if current_user.is_admin %}
+      <div class="nav-label">Administração</div>
+      <a class="{{ 'active' if request.endpoint == 'admin.usuarios' }}" href="{{ url_for('admin.usuarios') }}"><span class="ico">☺</span> Usuários</a>
+      {% endif %}
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar">{{ (current_user.nome or 'U')[:2]|upper }}</div>
+      <div style="flex:1">
+        <strong>{{ current_user.nome }}</strong>
+        <small>{{ current_user.perfil_rotulo }}{% if current_user.entidade %} · {{ current_user.entidade.codigo }}{% endif %}</small>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('auth.logout') }}" title="Sair">Sair</a>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn btn-secondary btn-sm menu-toggle" type="button" aria-label="Abrir menu">☰</button>
+        <div class="breadcrumb">{% block crumb %}{{ orgao }}{% endblock %}</div>
+      </div>
+      <div class="muted" style="font-size:13px">Manual TCE v1.19 · o envio ao Audesp é feito pelo gestor</div>
+    </header>
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+<div id="toast-stack" class="toast-stack"></div>
+{% for cat, msg in get_flashed_messages(with_categories=true) %}
+  <span hidden data-flash="{{ msg }}" data-type="{{ cat }}"></span>
+{% endfor %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

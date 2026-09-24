@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Acesso ao Sistema de Prestação de Contas da Prefeitura Municipal de Cosmópolis">
+    <title>{{ app_name }}</title>
+    <link rel="icon" href="{{ favicon_url }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ favicon_url }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/colors.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body class="login-body">
+    <div class="login-page">
+        <aside class="login-hero">
+            <img class="login-hero__art" src="{{ url_for('static', filename=login_hero_image) }}" alt="">
+            <div class="login-hero__overlay"></div>
+            <div class="login-hero__content">
+                <h1>Prestação de contas com conferência antes do arquivo do TCE</h1>
+                <p class="login-hero__lead">
+                    As entidades preenchem. O gestor confere, gera o JSON e transmite pelo AUDESP Fase V.
+                </p>
+                <ul class="login-hero__list">
+                    <li><i class="bi bi-building" aria-hidden="true"></i> APAE e Hospital em ambientes separados</li>
+                    <li><i class="bi bi-shield-check" aria-hidden="true"></i> Validação pelo Manual do TCE v1.19</li>
+                    <li><i class="bi bi-file-earmark-code" aria-hidden="true"></i> JSON somente após a conferência do gestor</li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="login-panel">
+            <div class="login-panel__inner">
+                <header class="login-brand">
+                    <img class="login-brand__mark" src="{{ favicon_url }}" alt="SPC">
+                    <div>
+                        <strong>{{ app_name }}</strong>
+                        <small>{{ prefeitura }}</small>
+                    </div>
+                </header>
+
+                <h2>Acessar sistema</h2>
+                <p class="login-subtitle">Entre com suas credenciais institucionais.</p>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="login-alert login-alert--{{ category }}" role="alert">
+                                <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form id="login-form" class="login-form" method="POST" action="{{ url_for('auth.login') }}" novalidate>
+                    {% if request.args.get('next') %}
+                    <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+                    {% endif %}
+
+                    <div class="login-field">
+                        <label for="username">Usuário</label>
+                        <div class="login-input">
+                            <i class="bi bi-person" aria-hidden="true"></i>
+                            <input type="text" id="username" name="username" value="{{ username|default('') }}"
+                                   autocomplete="username" autocapitalize="none" spellcheck="false"
+                                   required autofocus placeholder=" ">
+                        </div>
+                        <p class="login-field__error" id="username-error" hidden></p>
+                    </div>
+
+                    <div class="login-field">
+                        <label for="password">Senha</label>
+                        <div class="login-input">
+                            <i class="bi bi-lock" aria-hidden="true"></i>
+                            <input type="password" id="password" name="password"
+                                   autocomplete="current-password" required placeholder=" ">
+                            <button type="button" class="login-toggle" id="toggle-password"
+                                    aria-controls="password" aria-pressed="false" aria-label="Mostrar senha">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <p class="login-field__error" id="password-error" hidden></p>
+                    </div>
+
+                    <div class="login-row">
+                        <label class="login-remember">
+                            <input type="checkbox" id="remember" name="remember">
+                            <span>Lembrar-me neste equipamento</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="login-submit" id="login-submit">
+                        <span class="login-submit__label">
+                            <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+                            Entrar
+                        </span>
+                        <span class="login-submit__loading" hidden>
+                            <span class="login-spinner" aria-hidden="true"></span>
+                            Autenticando...
+                        </span>
+                    </button>
+                </form>
+
+                <p class="login-help">Em caso de bloqueio ou senha expirada, procure o administrador do sistema.</p>
+                <p class="login-foot">Versão {{ versao }} · Acesso restrito aos perfis autorizados</p>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>

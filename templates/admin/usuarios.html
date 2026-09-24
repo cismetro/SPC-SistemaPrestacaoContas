@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Usuários · {{ app_name }}{% endblock %}
+{% block crumb %}<strong>Administração</strong> · usuários{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Usuários e permissões</h1>
+    <p class="muted">Quatro responsabilidades: administrador, gestor, APAE e Hospital. Entidade não gera JSON.</p>
+  </div>
+</div>
+<div class="grid-2">
+  <article class="card">
+    <div class="card-head"><h3>Novo usuário</h3></div>
+    <form class="card-body form-grid" method="post">
+      <label class="field">Login<input class="input" name="username" required autocomplete="off"></label>
+      <label class="field">Nome<input class="input" name="nome" required></label>
+      <label class="field">E-mail<input class="input" type="email" name="email"></label>
+      <label class="field">Perfil
+        <select class="input" name="perfil">
+          {% for valor, rotulo in perfis %}<option value="{{ valor }}">{{ rotulo }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="field">Entidade, se o perfil for entidade
+        <select class="input" name="entidade_id">
+          <option value="">Nenhuma</option>
+          {% for entidade in entidades %}<option value="{{ entidade.id }}">{{ entidade.nome_exibicao }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="field">Senha<input class="input" type="password" name="password" required minlength="6"></label>
+      <label class="field full"><input type="checkbox" name="pode_gerar_json"> Permitir geração de JSON a um administrador</label>
+      <div class="full"><button class="btn btn-primary" type="submit">Criar usuário</button></div>
+    </form>
+  </article>
+  <article class="card">
+    <div class="card-head"><h3>Cadastrados</h3></div>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Usuário</th><th>Perfil</th><th>JSON</th><th></th></tr></thead>
+        <tbody>
+        {% for u in usuarios %}
+          <tr>
+            <td class="name">{{ u.nome }}<div class="sub">{{ u.username }}{% if u.entidade %} · {{ u.entidade.codigo }}{% endif %}</div></td>
+            <td>{{ u.perfil_rotulo }}</td>
+            <td>{% if u.is_gestor or u.pode_gerar_json %}<span class="badge badge-success">Pode gerar</span>{% else %}<span class="badge badge-neutral">Não gera</span>{% endif %}</td>
+            <td>
+              {% if u.username != 'admin' %}
+              <form method="post" action="{{ url_for('admin.alternar', user_id=u.id) }}">
+                <button class="btn btn-secondary btn-sm" type="submit">{{ 'Desativar' if u.ativo else 'Ativar' }}</button>
+              </form>
+              {% else %}
+              <span class="badge badge-success">Ativo</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</div>
+<article class="card" style="margin-top:16px">
+  <div class="card-head"><h3>Histórico recente das prestações</h3></div>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Quando</th><th>Quem</th><th>Ação</th><th>Detalhe</th></tr></thead>
+      <tbody>
+      {% for evento in historico %}
+        <tr>
+          <td>{{ evento.criado_em.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>{{ evento.usuario.nome if evento.usuario else '—' }}</td>
+          <td>{{ evento.acao }}</td>
+          <td>{{ evento.detalhe }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="empty">Sem eventos.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+{% endblock %}
