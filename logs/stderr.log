@@ -80,3 +80,9 @@
 127.0.0.1 - - [24/Sep/2026 13:09:30] "GET /static/img/login-hero.png HTTP/1.1" 304 -
 127.0.0.1 - - [24/Sep/2026 13:09:30] "GET /static/img/Favicon.ico?v=4efd8ef00a95 HTTP/1.1" 304 -
 127.0.0.1 - - [24/Sep/2026 13:09:30] "GET /static/js/login.js HTTP/1.1" 304 -
+127.0.0.1 - - [24/Sep/2026 13:10:53] "GET /auth/login?next=/ HTTP/1.1" 200 -
+127.0.0.1 - - [24/Sep/2026 13:10:56] "GET /static/css/colors.css HTTP/1.1" 304 -
+127.0.0.1 - - [24/Sep/2026 13:10:56] "GET /static/css/login.css HTTP/1.1" 304 -
+127.0.0.1 - - [24/Sep/2026 13:10:56] "GET /static/js/login.js HTTP/1.1" 304 -
+127.0.0.1 - - [24/Sep/2026 13:10:56] "GET /static/img/login-hero.png HTTP/1.1" 304 -
+127.0.0.1 - - [24/Sep/2026 13:10:56] "GET /static/img/Favicon.ico?v=4efd8ef00a95 HTTP/1.1" 304 -
